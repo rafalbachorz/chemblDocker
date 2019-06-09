@@ -1,0 +1,8 @@
+FROM jupyter/scipy-notebook
+
+USER root
+
+RUN conda install --yes -c anaconda psycopg2
+RUN conda install --yes -c rdkit rdkit
+
+USER jovyan

@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  # Computation engine: Jupyter Notebook
+  jupyter:
+    image: chemengine
+    container_name: "jupyterengine"
+    build:
+      context: services/jupyter
+      dockerfile: Dockerfile-cheminfoEngine
+    env_file:
+      - ./config/jupyter.env
+      - ./config/postgres.env
+    volumes:
+      - ./shared/notebooks/:/home/jovyan/work/notebooks
+    ports:
+      - 8888:8888
+    entrypoint: sh -c 'start-notebook.sh --NotebookApp.token=$$JUPYTER_PASSWORD'
+  # Persistence layer: Postgres
+  postgres:
+    image: postgres
+    container_name: "postgresengine"
+    env_file:
+      - ./config/postgres.env
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+      - ./services/postgres:/docker-entrypoint-initdb.d
+      - ./shared:/tmp
+    ports:
+      - 5432:5432
+  # Database management: Adminer
+  adminer:
+    image: adminer
+    container_name: "adminerengine"
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8085:8080
